@@ -125,12 +125,6 @@ class Mazda3 {
             lineWidth: this.relMin(0.02),
         };
 
-        const innerRing = {
-            color: "#303030",
-            lineWidth: this.relMin(0.003),
-            radius: props.radius - this.relMin(0.027),
-        };
-
         // width is larger
         const largePiller = {
             color: "white",
@@ -167,6 +161,28 @@ class Mazda3 {
             },
         };
 
+        const innerRing = {
+            color: "#373737",
+            lineWidth: this.relMin(0.003),
+            radius: props.radius - this.relMin(0.027),
+            margin: {
+                color: props.background,
+                size: this.relMin(0.0025),
+            },
+            piller: {
+                count: tinyPiller.count * 2,
+                length: this.relMin(0.017),
+            },
+        };
+
+        const label = {
+            color: "white",
+            font: "48px Alexandria",
+            letterSpacing: "-3px",
+            text: (largePillerIndex: number) => `${largePillerIndex * 20}`,
+            radius: props.radius - this.relMin(0.077),
+        };
+
         ////////////////////////////////////
 
         const width = this.canvas.canvas.width;
@@ -178,6 +194,7 @@ class Mazda3 {
         this.canvas.fillRect(0, 0, width, height);
 
         this.canvas.textBaseline = "hanging";
+        this.canvas.textAlign = "left";
         this.canvas.fillStyle = "white";
         this.canvas.font = "48px serif";
         this.canvas.fillText(_0pad(this.frames, 5), ...this.pos(0, 0));
@@ -190,6 +207,24 @@ class Mazda3 {
             props.angleFrom,
             props.angleTo,
         );
+
+        for (
+            let sheta =
+                props.angleFrom + ringLength / innerRing.piller.count / 2;
+            sheta <= props.angleTo;
+            sheta += ringLength / innerRing.piller.count
+        ) {
+            this.piller(
+                innerRing.color,
+                innerRing.lineWidth,
+                props.center,
+                innerRing.radius + innerRing.piller.length,
+                sheta,
+                innerRing.piller.length,
+                innerRing.margin.size,
+                innerRing.margin.color,
+            );
+        }
 
         this.circle(
             innerRing.color,
@@ -249,6 +284,21 @@ class Mazda3 {
                 tinyPiller.margin.size,
                 tinyPiller.margin.color,
             );
+        }
+
+        let index = 0;
+        for (
+            let sheta = props.angleFrom;
+            sheta <= props.angleTo;
+            sheta += ringLength / (largePiller.count - 1)
+        ) {
+            this.canvas.textBaseline = "middle";
+            this.canvas.textAlign = "center";
+            this.canvas.fillStyle = label.color;
+            this.canvas.font = label.font;
+            (this.canvas as any).letterSpacing = label.letterSpacing; // experimental feature
+            const pos = this.polar(props.center, label.radius, sheta);
+            this.canvas.fillText(label.text(index++), ...pos);
         }
     }
 }
