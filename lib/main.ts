@@ -155,6 +155,18 @@ class Mazda3 {
             },
         };
 
+        const tinyPiller = {
+            color: "white",
+            length: this.relMin(0.013),
+            lineWidth: this.relMin(0.003),
+            radius: smallPiller.radius,
+            count: smallPiller.count * 2,
+            margin: {
+                color: props.background,
+                size: this.relMin(0.0025),
+            },
+        };
+
         ////////////////////////////////////
 
         const width = this.canvas.canvas.width;
@@ -219,6 +231,23 @@ class Mazda3 {
                 smallPiller.length,
                 smallPiller.margin.size,
                 smallPiller.margin.color,
+            );
+        }
+
+        for (
+            let sheta = props.angleFrom + ringLength / tinyPiller.count / 2;
+            sheta <= props.angleTo;
+            sheta += ringLength / tinyPiller.count
+        ) {
+            this.piller(
+                tinyPiller.color,
+                tinyPiller.lineWidth,
+                props.center,
+                tinyPiller.radius,
+                sheta,
+                tinyPiller.length,
+                tinyPiller.margin.size,
+                tinyPiller.margin.color,
             );
         }
     }
