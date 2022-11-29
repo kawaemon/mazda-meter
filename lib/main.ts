@@ -1,5 +1,3 @@
-import { isThisTypeNode, textChangeRangeIsUnchanged } from "typescript";
-
 export function main(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d");
     if (ctx == null) {
@@ -107,6 +105,14 @@ class Mazda3 {
         this.canvas.stroke();
     }
 
+    text(props: { pos: Pos; text: string; color: string; font: string }) {
+        this.canvas.textBaseline = "middle";
+        this.canvas.textAlign = "center";
+        this.canvas.fillStyle = props.color;
+        this.canvas.font = props.font;
+        this.canvas.fillText(props.text, ...props.pos);
+    }
+
     draw() {
         this.frames += 1;
 
@@ -181,6 +187,51 @@ class Mazda3 {
             letterSpacing: "-3px",
             text: (largePillerIndex: number) => `${largePillerIndex * 20}`,
             radius: props.radius - this.relMin(0.077),
+        };
+
+        const unitLabel = {
+            pos: this.polar(
+                props.center,
+                props.radius - this.relMin(0.104),
+                -0.5 * pi,
+            ),
+            text: "mph",
+            color: "white",
+            font: "24px Alexandria",
+        };
+
+        const gearLabel = {
+            pos: this.polar(
+                props.center,
+                props.radius - this.relMin(0.12),
+                0.5 * pi,
+            ),
+            text: "P",
+            color: "white",
+            font: "60px Alexandria",
+        };
+
+        const needleAnimationFrames = 60 * 5;
+        const currentAnimationFrame = this.frames % needleAnimationFrames;
+        const animationProgress = currentAnimationFrame / needleAnimationFrames;
+        const needlePosProgress =
+            animationProgress < 0.5
+                ? animationProgress * 2
+                : (1.0 - animationProgress) * 2;
+
+        const needle = {
+            length: props.radius - outerRing.lineWidth / 2,
+            color: "white",
+            sheta:
+                props.angleFrom +
+                easeInOutQuint(needlePosProgress) *
+                    (props.angleTo - props.angleFrom),
+
+            lineWidth: this.relMin(0.003),
+            margin: {
+                color: props.background,
+                size: this.relMin(0.00325),
+            },
         };
 
         ////////////////////////////////////
@@ -300,7 +351,27 @@ class Mazda3 {
             const pos = this.polar(props.center, label.radius, sheta);
             this.canvas.fillText(label.text(index++), ...pos);
         }
+
+        this.text(unitLabel);
+        this.text(gearLabel);
+
+        this.piller(
+            needle.color,
+            needle.lineWidth,
+            props.center,
+            needle.length,
+            needle.sheta,
+            needle.length,
+            needle.margin.size,
+            needle.margin.color,
+        );
     }
+}
+
+// what a good page.
+// https://easings.net/#easeInOutQuint
+function easeInOutQuint(x: number): number {
+    return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
 }
 
 function _0pad(n: number, len: number): string {
