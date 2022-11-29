@@ -119,8 +119,8 @@ class Mazda3 {
         ////////////////////////////////////
 
         const props = {
-            angleFrom: -1.25 * pi,
-            angleTo: 0.25 * pi,
+            angleFrom: -1.5 * pi,
+            angleTo: 0.1 * pi,
             background: "#050505",
             center: this.pos(0.5, 0.5),
             radius: this.relMin(0.3),
@@ -129,6 +129,12 @@ class Mazda3 {
         const outerRing = {
             color: "#404040",
             lineWidth: this.relMin(0.02),
+            redLine: {
+                from:
+                    props.angleFrom +
+                    (props.angleTo - props.angleFrom) * (14 / 16),
+                color: "#b80000",
+            },
         };
 
         // width is larger
@@ -178,46 +184,51 @@ class Mazda3 {
             piller: {
                 count: tinyPiller.count * 2,
                 length: this.relMin(0.017),
+                redLine: {
+                    from: tinyPiller.count * 2 - 4,
+                    color: "#8f0000",
+                    length: this.relMin(0.015),
+                },
             },
         };
 
-        const label = {
+        const valueLabel = {
             color: "white",
-            font: "48px Alexandria",
+            font: `${this.relMin(0.044)}px Alexandria`,
             letterSpacing: "-3px",
-            text: (largePillerIndex: number) => `${largePillerIndex * 20}`,
+            text: (largePillerIndex: number) => `${largePillerIndex * 2}`,
             radius: props.radius - this.relMin(0.077),
         };
 
         const unitLabel = {
             pos: this.polar(
                 props.center,
-                props.radius - this.relMin(0.104),
+                props.radius - this.relMin(0.12),
                 -0.5 * pi,
             ),
-            text: "mph",
+            text: "x1000r/min",
             color: "white",
-            font: "24px Alexandria",
+            font: `${this.relMin(0.02)}px Alexandria`,
         };
 
-        const gearLabel = {
-            pos: this.polar(
-                props.center,
-                props.radius - this.relMin(0.12),
-                0.5 * pi,
-            ),
-            text: "P",
-            color: "white",
-            font: "60px Alexandria",
-        };
+        // const gearLabel = {
+        //     pos: this.polar(
+        //         props.center,
+        //         props.radius - this.relMin(0.12),
+        //         0.5 * pi,
+        //     ),
+        //     text: "P",
+        //     color: "white",
+        //     font: "60px Alexandria",
+        // };
 
         const needleAnimationFrames = 60 * 5;
         const currentAnimationFrame = this.frames % needleAnimationFrames;
         const animationProgress = currentAnimationFrame / needleAnimationFrames;
-        const needlePosProgress =
-            animationProgress < 0.5
-                ? animationProgress * 2
-                : (1.0 - animationProgress) * 2;
+        const needlePosProgress = 0;
+        //             animationProgress < 0.5
+        //                 ? animationProgress * 2
+        //                 : (1.0 - animationProgress) * 2;
 
         const needle = {
             length: props.radius - outerRing.lineWidth / 2,
@@ -256,25 +267,41 @@ class Mazda3 {
             props.center,
             props.radius,
             props.angleFrom,
+            outerRing.redLine.from,
+        );
+        this.circle(
+            outerRing.redLine.color,
+            outerRing.lineWidth,
+            props.center,
+            props.radius,
+            outerRing.redLine.from,
             props.angleTo,
         );
 
-        for (
-            let sheta =
-                props.angleFrom + ringLength / innerRing.piller.count / 2;
-            sheta <= props.angleTo;
-            sheta += ringLength / innerRing.piller.count
-        ) {
-            this.piller(
-                innerRing.color,
-                innerRing.lineWidth,
-                props.center,
-                innerRing.radius + innerRing.piller.length,
-                sheta,
-                innerRing.piller.length,
-                innerRing.margin.size,
-                innerRing.margin.color,
-            );
+        {
+            let index = 0;
+            for (
+                let sheta =
+                    props.angleFrom + ringLength / innerRing.piller.count / 2;
+                sheta <= props.angleTo;
+                sheta += ringLength / innerRing.piller.count
+            ) {
+                const isRed = index >= innerRing.piller.redLine.from;
+                this.piller(
+                    isRed ? innerRing.piller.redLine.color : innerRing.color,
+                    innerRing.lineWidth,
+                    props.center,
+                    isRed
+                        ? innerRing.radius + innerRing.piller.redLine.length
+                        : innerRing.radius + innerRing.piller.length,
+                    sheta,
+                    innerRing.piller.length,
+                    innerRing.margin.size,
+                    innerRing.margin.color,
+                );
+
+                index += 1;
+            }
         }
 
         this.circle(
@@ -345,15 +372,15 @@ class Mazda3 {
         ) {
             this.canvas.textBaseline = "middle";
             this.canvas.textAlign = "center";
-            this.canvas.fillStyle = label.color;
-            this.canvas.font = label.font;
-            (this.canvas as any).letterSpacing = label.letterSpacing; // experimental feature
-            const pos = this.polar(props.center, label.radius, sheta);
-            this.canvas.fillText(label.text(index++), ...pos);
+            this.canvas.fillStyle = valueLabel.color;
+            this.canvas.font = valueLabel.font;
+            (this.canvas as any).letterSpacing = valueLabel.letterSpacing; // experimental feature
+            const pos = this.polar(props.center, valueLabel.radius, sheta);
+            this.canvas.fillText(valueLabel.text(index++), ...pos);
         }
 
         this.text(unitLabel);
-        this.text(gearLabel);
+        // this.text(gearLabel);
 
         this.piller(
             needle.color,
