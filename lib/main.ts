@@ -121,7 +121,7 @@ class Mazda3 {
         const props = {
             angleFrom: -1.25 * pi,
             angleTo: 0.25 * pi,
-            background: "#101010",
+            background: "#050505",
             center: this.pos(0.5, 0.5),
             radius: this.relMin(0.3),
         };
